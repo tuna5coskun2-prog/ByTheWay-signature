@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>By The Way | Signature Generator</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+h1 {
+  letter-spacing: 4px;
+}
+
+h2 {
+  font-size: 16px;
+  color: #777;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 18px;
+  background: #171717;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+#preview {
+  margin-top: 25px;
+  overflow-x: auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>BY THE WAY</h1>
+<h2>Signature Generator</h2>
+
+<label>Ad Soyad</label>
+<input id="fullname" placeholder="Ad Soyad">
+
+<label>Pozisyon</label>
+<input id="position" placeholder="Event Coordinator">
+
+<label>E-posta</label>
+<input id="email" type="email" placeholder="mail@example.com">
+
+<label>Telefon</label>
+<input id="phone" placeholder="+90 555 000 0000">
+
+<label>Instagram</label>
+<input id="instagram" placeholder="Instagram URL">
+
+<label>LinkedIn</label>
+<input id="linkedin" placeholder="LinkedIn URL">
+
+<label>Web Sitesi</label>
+<input id="website" placeholder="Website URL">
+
+<label>Logo URL</label>
+<input id="logo" placeholder="Logo görsel bağlantısı">
+
+<button id="create">İmzamı Oluştur</button>
+<button id="share">Kişisel Bağlantımı Oluştur</button>
+
+<div id="preview"></div>
+<div id="shareResult"></div>
+
+</div>
+
+<script>
+const fields = [
+  "fullname", "position", "email", "phone",
+  "instagram", "linkedin", "website", "logo"
+];
+
+const params = new URLSearchParams(location.search);
+
+fields.forEach(id => {
+  document.getElementById(id).value = params.get(id) || "";
+});
+
+document.getElementById("create").onclick = function() {
+
+  const value = id =>
+    document.getElementById(id).value.trim();
+
+  const preview = document.getElementById("preview");
+  preview.replaceChildren();
+
+  const table = document.createElement("table");
+  table.style.cssText =
+    "border-collapse:collapse;background:white;max-width:480px;width:100%;font-family:Arial";
+
+  const row = table.insertRow();
+
+  const logoCell = row.insertCell();
+  logoCell.style.cssText = "padding:12px;width:110px";
+
+  if (value("logo")) {
+    const img = document.createElement("img");
+    img.src = value("logo");
+    img.alt = "By The Way";
+    img.style.cssText = "width:100px;height:auto";
+    logoCell.appendChild(img);
+  } else {
+    logoCell.textContent = "BY THE WAY";
+  }
+
+  const info = row.insertCell();
+  info.style.cssText = "padding:12px;border-left:2px solid #222";
+
+  function addLine(text, bold, size) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    div.style.cssText =
+      `margin:5px 0;font-size:${size}px;color:#222;${bold ? "font-weight:bold;" : ""}`;
+    info.appendChild(div);
+  }
+
+  addLine(value("fullname") || "Ad Soyad", true, 18);
+  addLine(value("position"), false, 13);
+  addLine(value("email"), false, 12);
+  addLine(value("phone"), false, 12);
+
+  const links = document.createElement("div");
+  links.style.marginTop = "10px";
+
+  ["instagram", "linkedin", "website"].forEach(id => {
+    const url = value(id);
+    if (!url) return;
+
+    try {
+      const parsed = new URL(url);
+      if (!["https:", "http:"].includes(parsed.protocol)) return;
+
+      const a = document.createElement("a");
+      a.href = parsed.href;
+      a.textContent = id.charAt(0).toUpperCase() + id.slice(1);
+      a.style.cssText = "margin-right:10px;color:#222;font-size:12px";
+      links.appendChild(a);
+    } catch {}
+  });
+
+  info.appendChild(links);
+  preview.appendChild(table);
+};
+
+document.getElementById("share").onclick = function() {
+  const url = new URL(location.href);
+
+  fields.forEach(id => {
+    const val = document.getElementById(id).value.trim();
+    if (val) url.searchParams.set(id, val);
+    else url.searchParams.delete(id);
+  });
+
+  document.getElementById("shareResult").textContent =
+    url.href;
+
+  navigator.clipboard?.writeText(url.href);
+};
+</script>
+
+</body>
+</html>
